@@ -51,4 +51,4 @@ export const details = {
   },
 };
 
-export const contractLogo = "/contract-logo.png";
+export const contractLogo = "ipfs://QmUAepKsFRFFA8nJBVCHP4YsqroogSZU5PZYiT5PqAtCC3/0.png";
