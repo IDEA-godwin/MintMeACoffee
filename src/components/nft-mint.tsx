@@ -106,7 +106,7 @@ export function NftMint(props: Props) {
             {props.displayName}
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-4">
-            {props?.description || "ERC1155 - Mint Me A Coffee"}
+            {props?.description || "MintMeACoffee.Com"}
           </p>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
