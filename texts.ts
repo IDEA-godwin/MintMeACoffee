@@ -51,4 +51,4 @@ export const details = {
   },
 };
 
-export const contractLogo = "ipfs://QmUAepKsFRFFA8nJBVCHP4YsqroogSZU5PZYiT5PqAtCC3/0.png";
+export const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png";
