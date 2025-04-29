@@ -1,12 +1,12 @@
 export const title = `
-Brewing the Future of Creators, One Coffee at a Time.
+Brewing the Future of Creators, One ☕ at a Time.
 `;
 
 export const description = `
-Mint Me A Coffee is a platform where you can support your favorite
-creators by minting unique coffee-themed NFTs. You can tip me as many coffees 
-as you’d like, and % of your tip supports artists & elephant conservation
-in Thailand.
+Mint me a coffee & collect cool coffee-themed NFT mugs and cups!
+creators by minting unique coffee-themed NFTs. A % of your support 
+also helps artists create new collectible designs while contributing 
+to a good causes.
 `;
 
 export const copyright = `
@@ -17,8 +17,8 @@ export const details = {
   "Crafted Digital Art from Coffee Culture": {
     icon: "☕",
     description: `
-      Limited-edition digital artwork inspired by global coffee
-      rituals, beans, and brewers—designed by top digital artists and
+      Limited-edition digital artwork inspired by global artistas
+      around coffee and brewers—designed by top digital artists and
       curated for true coffee lovers.
     `,
   },
