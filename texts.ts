@@ -1,16 +1,16 @@
 export const title = `
-Brew the Future of Coffee Own It.
+Brewing the Future of Creators, One Coffee at a Time.
 `;
 
 export const description = `
-Introducing CoffeeNFT — the world’s first artisanal coffee NFT
-collection that connects digital art with real-world coffee
-culture. Own rare digital beans, unlock premium perks, and sip
-your way into the metaverse.
+Mint Me A Coffee is a platform where you can support your favorite
+creators by minting unique coffee-themed NFTs. You can tip me as many coffees 
+as you’d like, and % of your tip supports artists & elephant conservation
+in Thailand.
 `;
 
 export const copyright = `
-© 2025 CoffeeNFT. All rights reserved. Brewed on the blockchain with ☕ & ❤️
+© 2025 CoffeeCulture Asia. All rights reserved. Brewed on the blockchain with ☕ & ❤️
 `;
 
 export const details = {
@@ -45,7 +45,7 @@ export const details = {
     icon: "💸",
     description: `
       A portion of every resale helps support coffee artists,
-      creators, and roasters—fueling the sustainable expansion of the
+      creators, and the sustainable expansion of the
       CoffeeNFT community.
     `,
   },
