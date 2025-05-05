@@ -3,10 +3,10 @@ Brewing the Future of Creators, One Coffee at a Time.
 `;
 
 export const description = `
-This is an MVP to test Mint Me a Coffee & gather feedback!
-The goal is to help creators monetize their work in a more socially accepted way by  
-"inviting" someone for a coffee, making the ask less awkward. In exchange for the tip, 
-fans receive coffee-themed NFT cups that will give discounts on our Web2 business 
+This is an MVP to test Mint Me a Coffee and gather feedback!
+The goal is to help creators monetize their work in a more socially accepted way  
+by “inviting” someone for a coffee, making the ask less awkward. In exchange for the tip, 
+fans receive coffee-themed NFT as collectibles, that will give them discounts on our Web2 business 
 CoffeeCulture.Asia!`;
 
 export const copyright = `
@@ -14,30 +14,32 @@ export const copyright = `
 `;
 
 export const details = {
-  "Crafted Digital Art from Coffee Culture": {
+  "Why Mint Me A Coffee?": {
     icon: "☕",
     description: `
-      Limited-edition digital artwork inspired by global artistas
-      around coffee and brewers—designed by top digital artists and
-      curated for true coffee lovers.
+      MMAC addresses the generic feel of Web3 tipping platforms with a distinctive 
+      coffee-themed mechanism. By leveraging coffee’s cultural appeal, MMAC simplifies
+      and enhances the tipping experience, making it relatable 
+      and engaging for creators and fans.
     `,
   },
 
-  "Blockchain Ownership with Real Perks": {
+  "Who is Mint Me a Coffee For?": {
+    icon: "💹",
+    description: `
+      Mint Me a Coffee aims to empower creators who can’t access banking services,
+      as well as 30% of existing online creators under 18—dynamicYouTubers, TikTokers, and artists
+      who are locked out of monetization by Web2 platforms. It also supports other creators who want 
+      immediate, low-fee payouts.
+    `,
+  },
+
+  "Tip with a Coffee, Mint a Collectibles!": {
     icon: "🔐",
     description: `
-      Backed by smart contracts, every CoffeeNFT comes with verifiable
-      ownership, instant transfers, and real-world utility like
-      discounts, drops, and subscriptions.
-    `,
-  },
-
-  "VIP Access to Coffee Events & Drops": {
-    icon: "🎟️",
-    description: `
-      Get exclusive entry to CoffeeDAO events, early access to new NFT
-      releases, premium coffee subscriptions, and private community
-      airdrops.
+      Web2 tipping lacks engaging rewards, reducing fan motivation to support creators.
+      MMAC concept introduces gamified coffee-themed NFTs as collectibles with perks,
+      incentivizing fans to tip more and discover new collectibles.
     `,
   },
 
