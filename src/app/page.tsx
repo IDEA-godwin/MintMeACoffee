@@ -86,12 +86,12 @@ export default async function Home() {
             <p className="text-muted-foreground mt-2">Chain</p>
           </div>
           <div className="p-12 text-center border-b md:border-b-0 md:border-r">
-            <h2 className="text-4xl font-bold">5 USD"</h2>
+            <h2 className="text-4xl font-bold">5 USD</h2>
             <p className="text-muted-foreground mt-2">Price Per "Coffee</p>
           </div>
           <div className="p-12 text-center">
-            <h2 className="text-4xl font-bold">Coffees</h2>
-            <p className="text-muted-foreground mt-2">MintMe As Many As You Want</p>
+            <h2 className="text-4xl font-bold">How Many?</h2>
+            <p className="text-muted-foreground mt-2">Mint Me As Many As You Want</p>
           </div>
         </section>
 
