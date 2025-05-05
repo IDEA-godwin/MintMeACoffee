@@ -6,7 +6,7 @@ export const description = `
 This is an MVP to test Mint Me a Coffee & gather feedback!
 The goal is to help creators monetize their work in a more socially accepted way by  
 "inviting" someone for a coffee, making the ask less awkward. In exchange for the tip, 
-fans receive coffee-themed NFT cups that will give discounts on our Web2 business, 
+fans receive coffee-themed NFT cups that will give discounts on our Web2 business 
 CoffeeCulture.Asia!`;
 
 export const copyright = `
