@@ -1,9 +1,9 @@
 export const title = `
-Brewing the Future of Creators, One ☕ at a Time.
+Brewing the Future of Creators, One Coffee at a Time.
 `;
 
 export const description = `
-Mint me a coffee & collect cool coffee-themed NFT mugs and cups!
+This is an MVP to test Mint Me a Coffee!
 creators by minting unique coffee-themed NFTs. A % of your support 
 also helps artists create new collectible designs while contributing 
 to a good causes.
