@@ -82,17 +82,16 @@ export default async function Home() {
             <h2 className="text-4xl font-bold flex items-center gap-x-1 justify-center">
               {" "}
               <img src="/base-testnet.png" className="w-6 h-6" alt="" /> Base
-              Testnet
             </h2>
             <p className="text-muted-foreground mt-2">Chain</p>
           </div>
           <div className="p-12 text-center border-b md:border-b-0 md:border-r">
-            <h2 className="text-4xl font-bold">0.0 ETH</h2>
-            <p className="text-muted-foreground mt-2">Mint Price</p>
+            <h2 className="text-4xl font-bold">5 USD"</h2>
+            <p className="text-muted-foreground mt-2">Price Per "Coffee</p>
           </div>
           <div className="p-12 text-center">
-            <h2 className="text-4xl font-bold">10</h2>
-            <p className="text-muted-foreground mt-2">Max Per Wallet</p>
+            <h2 className="text-4xl font-bold">Coffees</h2>
+            <p className="text-muted-foreground mt-2">MintMe As Many As You Want</p>
           </div>
         </section>
 
