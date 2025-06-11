@@ -657,11 +657,11 @@ async function main() {
     }
 
     // Login to Vercel
-    console.log('pre login');
-    if (!await loginToVercel()) {
-      console.error('\n❌ Failed to log in to Vercel. Please try again.');
-      process.exit(1);
-    }
+    // console.log('pre login');
+    // if (!(await loginToVercel())) {
+    //   console.error('\n❌ Failed to log in to Vercel. Please try again.');
+    //   process.exit(1);
+    // }
 
     // Deploy to Vercel
     await deployToVercel(useGitHub);
