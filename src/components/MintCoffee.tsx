@@ -52,24 +52,24 @@ export default function MintCoffee(
                         onClick={decreaseQuantity}
                         disabled={quantity <= 1}
                         aria-label="Decrease quantity"
-                        className="rounded-r-none"
+                        className="rounded-r-none bg-black"
                      >
-                        <Minus className="h-4 w-4 bg-black" />
+                        <Minus className="h-4 w-4" />
                      </Button>
                      <Input
                         type="number"
                         value={quantity}
                         onChange={handleQuantityChange}
-                        className="w-10 sm:w-28 text-center rounded-none border-x-0 sm:pl-6"
+                        className="w-10 sm:w-24 text-center rounded-none border-x-0 sm:pl-6"
                         min="1"
                         max="10"
                      />
                      <Button
                         onClick={increaseQuantity}
                         aria-label="Increase quantity"
-                        className="rounded-l-none"
+                        className="rounded-l-none bg-black"
                      >
-                        <Plus className="h-4 w-4 bg-black" />
+                        <Plus className="h-4 w-4 " />
                      </Button>
                   </div>
                   <div className="text-base pr-1 font-semibold dark:text-white">
