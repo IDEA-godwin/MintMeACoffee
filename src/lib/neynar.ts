@@ -1,6 +1,5 @@
 import { NeynarAPIClient, Configuration, WebhookUserCreated } from '@neynar/nodejs-sdk';
 import { APP_URL } from './constants';
-import { UserSearchResponse } from '@neynar/nodejs-sdk/build/api';
 
 let neynarClient: NeynarAPIClient | null = null;
 

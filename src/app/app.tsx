@@ -22,7 +22,7 @@ export default function App(
 
   // Search state
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
@@ -60,12 +60,12 @@ export default function App(
     const { scrollTop, scrollHeight, clientHeight } = dropdownRef.current;
     if (scrollHeight - scrollTop - clientHeight < 40) {
       setLoading(true);
-      fetch(`https://example.com/api/search?q=${encodeURIComponent(query)}&limit=10&cursor=${encodeURIComponent(cursor ?? "")}`)
+      fetch(`https://example.com/api/search?q=${encodeURIComponent(query)}&cursor=${encodeURIComponent(cursor ?? "")}`)
         .then(res => res.json())
-        .then(data => {
-          setResults(prev => [...prev, ...(data.items || [])]);
-          setCursor(data.nextCursor);
-          setHasMore(!!data.nextCursor);
+        .then( ({ result }) => {
+          setResults(prev => [...prev, ...(result.users || [])]);
+          setCursor(result.nextCursor);
+          setHasMore(!!result.nextCursor);
         })
         .finally(() => setLoading(false));
     }
