@@ -33,20 +33,30 @@ export default function MintCoffee(
    return (
       <Pattern>
          <Card className="w-full max-w-md">
-            <CardContent className="pt-6">
-               <div className="aspect-square overflow-hidden rounded-lg mb-4 relative">
-                  <img src={contractLogo} alt="" className="w-full h-full object-cover" />
-                  <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-sm font-semibold">
-                     5 USDC/each
-                  </div>
-               </div>
-               <h2 className="text-2xl font-bold mb-2 dark:text-white">
-                  {title || "Mint Coffee"}
+            <CardContent className="">
+               <h2 className="text-2xl font-bold dark:text-white">
+                  {"Mint ?? a Coffee"}
                </h2>
+               <div className="w-full flex justify-between items-center rounded-lg mb-4 gap-2">
+                  <div className="flex items-center relative">
+                     <span className="w-20 inline-block">
+                        <img src={contractLogo} alt="" className="w-full h-full object-cover" />
+                     </span>
+                     <span className="absolute end-0 top-[-15px] text-sm font-semibold ">
+                        {/* <span className="bg-gray-300 rounded-lg p-1 text-xs">$5 each</span> */}
+                        <br />x {quantity}
+                     </span>
+                  </div>
+                  <textarea 
+                     placeholder="Say something nice ..." 
+                     className="w-[250px] h-24 mt-2 p-1 border border-gray-300 rounded-lg focus:outline-none focus:border-black placeholder:text-sm"
+                  ></textarea>
+               </div>
+
                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Mint Me As Many Coffee As You Like!
+                  No such thing as over caffination here!
                </p>
-               <div className="flex flex-col md:flex-row items-center justify-between mb-4">
+               <div className="flex items-center justify-center mb-4 gap-4">
                   <div className="flex items-center">
                      <Button
                         onClick={decreaseQuantity}
@@ -72,11 +82,11 @@ export default function MintCoffee(
                         <Plus className="h-4 w-4 " />
                      </Button>
                   </div>
-                  <div className="text-base pr-1 font-semibold dark:text-white">
-                     Total: { 5 * quantity} { "USDC" }
+                  <div className="text-base pr-1 mt-5 font-semibold dark:text-white">
+                     Total: {5 * quantity} {"USDC"}
                   </div>
                </div>
-
+               <Button>Support</Button>
                {/* <div className="flex items-center space-x-2 mb-4">
                   <Switch
                      id="custom-address"

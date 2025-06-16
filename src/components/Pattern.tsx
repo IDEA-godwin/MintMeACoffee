@@ -6,7 +6,7 @@ import styled from "styled-components";
 const Pattern = ({ children }: { children: React.ReactNode }) => {
   return (
     <StyledWrapper>
-      <div className="container h-screen flex justify-center items-center px-5">{children}</div>
+      <div className="container h-70 flex justify-center py-4 px-3">{children}</div>
     </StyledWrapper>
   );
 };
