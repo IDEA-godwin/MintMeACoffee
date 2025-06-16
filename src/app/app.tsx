@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { APP_NAME } from "~/lib/constants";
 
 import { Gluten } from "next/font/google";
 import { Input } from "~/components/ui/input";
