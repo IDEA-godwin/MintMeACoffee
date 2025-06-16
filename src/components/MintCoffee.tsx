@@ -6,9 +6,12 @@ import { Button } from "./ui/Button";
 import { Card, CardContent } from "./ui/card";
 import { Minus, Plus } from "lucide-react";
 import { Input } from "./ui/input";
+import { User } from "@neynar/nodejs-sdk/build/api";
 
 
-export default function MintCoffee() {
+export default function MintCoffee(
+   { creator }: { creator: User | undefined }
+) {
 
    const [quantity, setQuantity] = useState(1);
    const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png"; // Replace with actual logo URL
@@ -32,9 +35,9 @@ export default function MintCoffee() {
       <Pattern>
          <Card className="w-full max-w-md">
             <CardContent className="">
-               <h2 className="text-2xl font-bold dark:text-white">
-                  {"Mint ?? a Coffee"}
-               </h2>
+               <h3 className="text-2xl font-bold dark:text-white">
+                  {`Mint ${creator?.display_name || "??"} a Coffee`}
+               </h3>
                <div className="w-full flex justify-between items-center rounded-lg mb-4 gap-2">
                   <div className="flex items-center relative">
                      <span className="w-20 inline-block">

@@ -1,6 +1,5 @@
 import { NeynarAPIClient, Configuration, WebhookUserCreated } from '@neynar/nodejs-sdk';
 import { APP_URL } from './constants';
-import { UserSearchResponseResult } from '@neynar/nodejs-sdk/build/api';
 
 let neynarClient: NeynarAPIClient | null = null;
 
@@ -76,17 +75,20 @@ export async function sendNeynarFrameNotification({
   }
 } 
 
-export async function searchUsername(q: string, cursor?: string): Promise<UserSearchResponseResult> {
+export async function getByUsernameOrFID(usernameOrFID: string) {
   try {
     const client = getNeynarClient();
-    const { result } = await client.searchUser({
-      q,
-      cursor,
-      limit: 10,
-    });
-    return result;
+
+    if (Number.isNaN(usernameOrFID as any)) {
+      const fid = Number(usernameOrFID);
+      const result = await client.fetchBulkUsers({ fids: [fid] });
+      return result.users[0] || null;
+    }
+    console.log(await client.lookupUserByUsername({ username: usernameOrFID }));
+    const result = await client.lookupUserByUsername({ username: usernameOrFID });
+    return result.user || null;
   } catch (error) {
     console.error('Error searching usernames:', error);
-    return { users: [], next: undefined };
+    return null;
   }
 }
