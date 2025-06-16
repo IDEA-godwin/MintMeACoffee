@@ -1,5 +1,6 @@
 import { NeynarAPIClient, Configuration, WebhookUserCreated } from '@neynar/nodejs-sdk';
 import { APP_URL } from './constants';
+import { UserSearchResponseResult } from '@neynar/nodejs-sdk/build/api';
 
 let neynarClient: NeynarAPIClient | null = null;
 
@@ -75,17 +76,17 @@ export async function sendNeynarFrameNotification({
   }
 } 
 
-export async function searchUsername(q: string, cursor?: string) {
+export async function searchUsername(q: string, cursor?: string): Promise<UserSearchResponseResult> {
   try {
     const client = getNeynarClient();
-    const response = await client.searchUser({
+    const { result } = await client.searchUser({
       q,
       cursor,
       limit: 10,
     });
-    return response;
+    return result;
   } catch (error) {
     console.error('Error searching usernames:', error);
-    return { users: [], nextCursor: undefined };
+    return { users: [], next: undefined };
   }
 }

@@ -6,6 +6,7 @@ import { APP_NAME } from "~/lib/constants";
 
 import { Gluten } from "next/font/google";
 import { Input } from "~/components/ui/input";
+import { SearchedUser } from "@neynar/nodejs-sdk/build/api";
 const display = Gluten({ subsets: ["latin"], variable: "--font-display" });
 
 // note: dynamic import is required for components that use the Frame SDK
@@ -14,15 +15,13 @@ const MintCoffee = dynamic(() => import("~/components/MintCoffee"), {
 });
 
 
-export default function App(
-  { title }: { title?: string } = { title: APP_NAME }
-) {
+export default function App() {
 
   const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png";
 
   // Search state
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<Array<SearchedUser>>([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
@@ -114,14 +113,14 @@ export default function App(
           >
             {results.map((item, idx) => (
               <li
-                key={item.id || idx}
+                key={item.fid || idx}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 onMouseDown={() => {
-                  setQuery(item.name || "");
+                  setQuery(item.display_name || "");
                   setShowDropdown(false);
                 }}
               >
-                {item.name || JSON.stringify(item)}
+                {item.display_name || JSON.stringify(item)}
               </li>
             ))}
             {loading && (

@@ -8,9 +8,7 @@ import { Minus, Plus } from "lucide-react";
 import { Input } from "./ui/input";
 
 
-export default function MintCoffee(
-   { title }: { title?: string } = { title: "Mint me a Coffee" }
-) {
+export default function MintCoffee() {
 
    const [quantity, setQuantity] = useState(1);
    const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png"; // Replace with actual logo URL
