@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import { Gluten } from "next/font/google";
 import { Input } from "~/components/ui/input";
@@ -21,7 +21,7 @@ export default function App() {
   // Search state
   const [usernameOrFID, setUsernameOrFID] = useState("");
   const [isInvalid, setIsInvalid] = useState(false);
-  const [user, setUser] = useState<any | undefined>(undefined);
+  const [user, setUser] = useState<User | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLUListElement | null>(null);

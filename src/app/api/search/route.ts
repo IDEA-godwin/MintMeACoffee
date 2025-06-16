@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
    // const res = await searchUsername(q, cursor ?? undefined);
    try {
       let uri = `by_username/?username=${encodeURIComponent(usernameOrFID)}`;
-      if (Number.isNaN(usernameOrFID as any)) {
+      if (Number.isNaN(usernameOrFID)) {
          uri = `bulk/?fids=${encodeURIComponent(usernameOrFID)}`;
       }
       const res = await fetch(

@@ -74,21 +74,3 @@ export async function sendNeynarFrameNotification({
     return { state: "error", error };
   }
 } 
-
-export async function getByUsernameOrFID(usernameOrFID: string) {
-  try {
-    const client = getNeynarClient();
-
-    if (Number.isNaN(usernameOrFID as any)) {
-      const fid = Number(usernameOrFID);
-      const result = await client.fetchBulkUsers({ fids: [fid] });
-      return result.users[0] || null;
-    }
-    console.log(await client.lookupUserByUsername({ username: usernameOrFID }));
-    const result = await client.lookupUserByUsername({ username: usernameOrFID });
-    return result.user || null;
-  } catch (error) {
-    console.error('Error searching usernames:', error);
-    return null;
-  }
-}
