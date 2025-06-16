@@ -11,7 +11,7 @@ import { useSession } from "next-auth/react";
 
 
 export default function MintCoffee(
-   { creator, handleSignIn, signingIn, signInFailure }: { creator: User | undefined, handleSignIn: () => void, signingIn: boolean, signInFailure: string | undefined }
+   { creator, handleSignIn, signingIn, signInFailure }: { creator: User | undefined, handleSignIn: () => Promise<Boolean>, signingIn: boolean, signInFailure: string | undefined }
 ) {
 
   const { data: session, status } = useSession();
@@ -43,9 +43,9 @@ export default function MintCoffee(
       }
    }, [signInFailure]);
 
-   const handleSupport = () => {
+   const handleSupport = async () => {
       if (status !== "authenticated") {
-         handleSignIn();
+         await handleSignIn();
          return;
       }
       console.log(session);
@@ -108,6 +108,12 @@ export default function MintCoffee(
                   </div>
                </div>
                <Button onClick={handleSupport}>Support</Button>
+
+               {status === "unauthenticated" && (
+                  <p className="text-red-500 mt-2">
+                     Please sign in to support {creator?.display_name || "this creator"}.
+                  </p>
+               )}
                {/* <div className="flex items-center space-x-2 mb-4">
                   <Switch
                      id="custom-address"

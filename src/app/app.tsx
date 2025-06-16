@@ -34,7 +34,7 @@ export default function App() {
       return nonce;
     }, []);
   
-    const handleSignIn = useCallback(async () => {
+    const handleSignIn = useCallback(async (): Promise<Boolean> => {
       try {
         setSigningIn(true);
         setSignInFailure(undefined);
