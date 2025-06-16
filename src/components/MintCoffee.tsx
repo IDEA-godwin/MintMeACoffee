@@ -11,7 +11,7 @@ import { useSession } from "next-auth/react";
 
 
 export default function MintCoffee(
-   { creator, handleSignIn, signingIn, signInFailure }: { creator: User | undefined, handleSignIn: () => Promise<Boolean>, signingIn: boolean, signInFailure: string | undefined }
+   { creator, handleSignIn, signingIn, signInFailure }: { creator: User | undefined, handleSignIn: () => Promise<boolean>, signingIn: boolean, signInFailure: string | undefined }
 ) {
 
   const { data: session, status } = useSession();
