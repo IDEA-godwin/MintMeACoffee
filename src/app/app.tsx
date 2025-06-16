@@ -1,7 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useState, useEffect, useRef } from "react";
+import { signIn, getCsrfToken  } from "next-auth/react";
+import sdk, {
+  SignIn as SignInCore,
+} from "@farcaster/frame-sdk";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 import { Gluten } from "next/font/google";
 import { Input } from "~/components/ui/input";
@@ -17,6 +21,55 @@ const MintCoffee = dynamic(() => import("~/components/MintCoffee"), {
 export default function App() {
 
   const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png";
+
+  const [signingIn, setSigningIn] = useState(false);
+  // const [signingOut, setSigningOut] = useState(false);
+  const [signInResult, setSignInResult] = useState<SignInCore.SignInResult>();
+  const [signInFailure, setSignInFailure] = useState<string>();
+  // const { data: session, status } = useSession();
+
+    const getNonce = useCallback(async () => {
+      const nonce = await getCsrfToken();
+      if (!nonce) throw new Error("Unable to generate nonce");
+      return nonce;
+    }, []);
+  
+    const handleSignIn = useCallback(async () => {
+      try {
+        setSigningIn(true);
+        setSignInFailure(undefined);
+        const nonce = await getNonce();
+        const result = await sdk.actions.signIn({ nonce });
+        setSignInResult(result);
+        console.log("SignIn Result:", signInResult);
+  
+        await signIn("credentials", {
+          message: result.message,
+          signature: result.signature,
+          redirect: false,
+        });
+        return true;
+      } catch (e) {
+        if (e instanceof SignInCore.RejectedByUser) {
+          setSignInFailure("Rejected by user");
+          return false;
+        }
+        setSignInFailure("Unknown error");
+        return false;
+      } finally {
+        setSigningIn(false);
+      }
+    }, [getNonce]);
+    
+    // const handleSignOut = useCallback(async () => {
+    //   try {
+    //     setSigningOut(true);
+    //     await signOut({ redirect: false });
+    //     setSignInResult(undefined);
+    //   } finally {
+    //     setSigningOut(false);
+    //   }
+    // }, []);
 
   // Search state
   const [usernameOrFID, setUsernameOrFID] = useState("");
@@ -55,7 +108,7 @@ export default function App() {
         console.log("Fetched user:", user);
         setIsInvalid(false)
       })
-      .catch(() => { console.log("Error fetching user:", usernameOrFID); setIsInvalid(true)})
+      .catch(() => { console.log("Error fetching user:", usernameOrFID); setIsInvalid(true) })
       .finally(() => setLoading(false));
   };
 
@@ -92,13 +145,13 @@ export default function App() {
             className="absolute z-10 left-0 right-0 mt-2 bg-white border rounded-xl shadow-lg max-h-60 overflow-auto text-left"
             tabIndex={-1}
           >
-            { user && user.fid &&
+            {user && user.fid &&
               <li
                 className="px-4 py-4 text-black flex items-center gap-2 hover:bg-gray-300 cursor-pointer"
-                onClick={() => {setCreator(user); setShowDropdown(false)}}
+                onClick={() => { setCreator(user); setShowDropdown(false) }}
               >
-               { user.pfp_url && <img src={user.pfp_url} alt={user.display_name} className="w-8 h-8 rounded-full mr-2" /> }
-               { user.display_name ? <span>{user.display_name}</span> : <span className="text-gray-400">Unknown User</span> }
+                {user.pfp_url && <img src={user.pfp_url} alt={user.display_name} className="w-8 h-8 rounded-full mr-2" />}
+                {user.display_name ? <span>{user.display_name}</span> : <span className="text-gray-400">Unknown User</span>}
               </li>
             }
             {loading && (
@@ -116,7 +169,7 @@ export default function App() {
           </ul>
         )}
       </div>
-      <MintCoffee creator={creator} />
+      <MintCoffee creator={creator} handleSignIn={handleSignIn} signingIn={signingIn} signInFailure={signInFailure} />
     </main>
   );
 }

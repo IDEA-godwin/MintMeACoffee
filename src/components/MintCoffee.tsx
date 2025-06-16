@@ -1,17 +1,20 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Pattern from "./Pattern";
 import { Button } from "./ui/Button";
 import { Card, CardContent } from "./ui/card";
 import { Minus, Plus } from "lucide-react";
 import { Input } from "./ui/input";
 import { User } from "@neynar/nodejs-sdk/build/api";
+import { useSession } from "next-auth/react";
 
 
 export default function MintCoffee(
-   { creator }: { creator: User | undefined }
+   { creator, handleSignIn, signingIn, signInFailure }: { creator: User | undefined, handleSignIn: () => void, signingIn: boolean, signInFailure: string | undefined }
 ) {
+
+  const { data: session, status } = useSession();
 
    const [quantity, setQuantity] = useState(1);
    const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png"; // Replace with actual logo URL
@@ -30,6 +33,23 @@ export default function MintCoffee(
          setQuantity(Math.min(Math.max(1, value)));
       }
    };
+
+   useEffect(() => {
+      if (signingIn) {
+         console.log("Signing in...");
+      }
+      if (signInFailure) {
+         console.log("SignIn Failed:", signInFailure);
+      }
+   }, [signInFailure]);
+
+   const handleSupport = () => {
+      if (status !== "authenticated") {
+         handleSignIn();
+         return;
+      }
+      console.log(session);
+   }
 
    return (
       <Pattern>
@@ -87,7 +107,7 @@ export default function MintCoffee(
                      Total: {5 * quantity} {"USDC"}
                   </div>
                </div>
-               <Button>Support</Button>
+               <Button onClick={handleSupport}>Support</Button>
                {/* <div className="flex items-center space-x-2 mb-4">
                   <Switch
                      id="custom-address"
