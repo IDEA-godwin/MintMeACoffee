@@ -14,7 +14,7 @@ export default function MintCoffee(
    { creator, handleSignIn, signingIn, signInFailure }: { creator: User | undefined, handleSignIn: () => Promise<boolean>, signingIn: boolean, signInFailure: string | undefined }
 ) {
 
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
    const [quantity, setQuantity] = useState(1);
    const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png"; // Replace with actual logo URL
@@ -45,10 +45,18 @@ export default function MintCoffee(
 
    const handleSupport = async () => {
       if (status !== "authenticated") {
-         await handleSignIn();
+         const isSignedIn = await handleSignIn();
+         if (!isSignedIn) return; //TO-DO: Handle sign-in failure gracefully by adding toasts
+      }
+      
+      if (!creator) {
+         console.error("Creator not found");
+         // TO-DO: Handle the case where the creator is not found, e.g., show an error message
          return;
       }
-      console.log(session);
+
+      // Handle the support logic here, e.g., minting the NFT or sending a transaction
+
    }
 
    return (
@@ -110,8 +118,8 @@ export default function MintCoffee(
                <Button onClick={handleSupport}>Support</Button>
 
                {status === "unauthenticated" && (
-                  <p className="text-red-500 mt-2">
-                     Please sign in to support {creator?.display_name || "this creator"}.
+                  <p className="text-center text-red-500 mt-2">
+                     Please sign in to support {creator?.username || "this creator"}.
                   </p>
                )}
                {/* <div className="flex items-center space-x-2 mb-4">

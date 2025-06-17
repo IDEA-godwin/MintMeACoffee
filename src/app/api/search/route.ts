@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
    // const res = await searchUsername(q, cursor ?? undefined);
    try {
       let uri = `by_username/?username=${encodeURIComponent(usernameOrFID)}`;
-      if (Number.isNaN(usernameOrFID)) {
+      if (typeof Number.parseInt(usernameOrFID) === "number" && !Number.isNaN(Number.parseInt(usernameOrFID))) {
          uri = `bulk/?fids=${encodeURIComponent(usernameOrFID)}`;
       }
       const res = await fetch(
@@ -19,7 +19,11 @@ export async function GET(req: NextRequest) {
             },
          }
       );
-      const data = await res.json();
+      let data = await res.json();
+      if (uri.startsWith("bulk/")) {
+         data = { user: data.users[0] || null };
+      }
+
       console.log("User search response:", data);
       return new Response(JSON.stringify(data), {
          status: 200,

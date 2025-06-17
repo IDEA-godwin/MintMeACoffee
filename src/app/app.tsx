@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { signIn, getCsrfToken  } from "next-auth/react";
+import { signIn, getCsrfToken, useSession } from "next-auth/react";
 import sdk, {
   SignIn as SignInCore,
 } from "@farcaster/frame-sdk";
@@ -10,6 +10,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Gluten } from "next/font/google";
 import { Input } from "~/components/ui/input";
 import { User } from "@neynar/nodejs-sdk/build/api";
+import { set } from "zod";
 const display = Gluten({ subsets: ["latin"], variable: "--font-display" });
 
 // note: dynamic import is required for components that use the Frame SDK
@@ -26,50 +27,64 @@ export default function App() {
   // const [signingOut, setSigningOut] = useState(false);
   const [signInResult, setSignInResult] = useState<SignInCore.SignInResult>();
   const [signInFailure, setSignInFailure] = useState<string>();
-  // const { data: session, status } = useSession();
+  const { data: session, status } = useSession();
 
-    const getNonce = useCallback(async () => {
-      const nonce = await getCsrfToken();
-      if (!nonce) throw new Error("Unable to generate nonce");
-      return nonce;
-    }, []);
-  
-    const handleSignIn = useCallback(async (): Promise<boolean> => {
-      try {
-        setSigningIn(true);
-        setSignInFailure(undefined);
-        const nonce = await getNonce();
-        const result = await sdk.actions.signIn({ nonce });
-        setSignInResult(result);
-        console.log("SignIn Result:", signInResult);
-  
-        await signIn("credentials", {
-          message: result.message,
-          signature: result.signature,
-          redirect: false,
+  const [authUser, setAuthUser] = useState<User | undefined>(undefined);
+
+  const getNonce = useCallback(async () => {
+    const nonce = await getCsrfToken();
+    if (!nonce) throw new Error("Unable to generate nonce");
+    return nonce;
+  }, []);
+
+  useEffect(() => {
+    if (!signingIn && status === "authenticated") {
+      console.log("User is authenticated:", session);
+      fetch("/api/search?usernameOrFID=" + encodeURIComponent(session.user.fid))
+        .then(res => res.json())
+        .then(result => {
+          console.log("Fetched user:", result);
+          setAuthUser(result.user);
         });
-        return true;
-      } catch (e) {
-        if (e instanceof SignInCore.RejectedByUser) {
-          setSignInFailure("Rejected by user");
-          return false;
-        }
-        setSignInFailure("Unknown error");
+    }
+  }, [signingIn, status])
+
+  const handleSignIn = useCallback(async (): Promise<boolean> => {
+    try {
+      setSigningIn(true);
+      setSignInFailure(undefined);
+      const nonce = await getNonce();
+      const result = await sdk.actions.signIn({ nonce });
+      setSignInResult(result);
+      console.log("SignIn Result:", signInResult);
+
+      await signIn("credentials", {
+        message: result.message,
+        signature: result.signature,
+        redirect: false,
+      });
+      return true;
+    } catch (e) {
+      if (e instanceof SignInCore.RejectedByUser) {
+        setSignInFailure("Rejected by user");
         return false;
-      } finally {
-        setSigningIn(false);
       }
-    }, [getNonce]);
-    
-    // const handleSignOut = useCallback(async () => {
-    //   try {
-    //     setSigningOut(true);
-    //     await signOut({ redirect: false });
-    //     setSignInResult(undefined);
-    //   } finally {
-    //     setSigningOut(false);
-    //   }
-    // }, []);
+      setSignInFailure("Unknown error");
+      return false;
+    } finally {
+      setSigningIn(false);
+    }
+  }, [getNonce]);
+
+  // const handleSignOut = useCallback(async () => {
+  //   try {
+  //     setSigningOut(true);
+  //     await signOut({ redirect: false });
+  //     setSignInResult(undefined);
+  //   } finally {
+  //     setSigningOut(false);
+  //   }
+  // }, []);
 
   // Search state
   const [usernameOrFID, setUsernameOrFID] = useState("");
@@ -113,7 +128,7 @@ export default function App() {
   };
 
   return (
-    <main className={`${display.className}`}>
+    <main className={`${display.className} relative`}>
       <header className="sticky p-2 bg-white w-full flex justify-center items-center gap-x-1 rounded-b-sm shadow-md">
         <span className="relative w-10 h-10 rounded-full overflow-hidden">
           <img src={contractLogo} alt="" className="w-full h-full object-cover" />
@@ -121,7 +136,7 @@ export default function App() {
         <h3 className="mt-3">Mint me a coffee</h3>
       </header>
       <div className="bg-white text-center p-3 mt-4">
-        GM @lemon-king, welcome to <span className="underline">mintmeacoffee.com</span><br /><br />
+        GM!{authUser && authUser.fid ? " @" + authUser.username + "," : ""} welcome to <span className="underline">mintmeacoffee.com</span><br /><br />
         Support your favorite creator with a ☕ and<br /> get rewards with unique coffee-mug NFTs
       </div>
       <div className="mb-3 p-3 relative">
