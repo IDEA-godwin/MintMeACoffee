@@ -10,7 +10,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Gluten } from "next/font/google";
 import { Input } from "~/components/ui/input";
 import { User } from "@neynar/nodejs-sdk/build/api";
-import { set } from "zod";
 const display = Gluten({ subsets: ["latin"], variable: "--font-display" });
 
 // note: dynamic import is required for components that use the Frame SDK
