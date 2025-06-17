@@ -8,13 +8,14 @@ import { Minus, Plus } from "lucide-react";
 import { Input } from "./ui/input";
 import { User } from "@neynar/nodejs-sdk/build/api";
 import { useSession } from "next-auth/react";
+import sdk from "@farcaster/frame-sdk";
 
 
 export default function MintCoffee(
    { creator, handleSignIn, signingIn, signInFailure }: { creator: User | undefined, handleSignIn: () => Promise<boolean>, signingIn: boolean, signInFailure: string | undefined }
 ) {
 
-  const { status } = useSession();
+   const { status } = useSession();
 
    const [quantity, setQuantity] = useState(1);
    const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png"; // Replace with actual logo URL
@@ -48,15 +49,19 @@ export default function MintCoffee(
          const isSignedIn = await handleSignIn();
          if (!isSignedIn) return; //TO-DO: Handle sign-in failure gracefully by adding toasts
       }
-      
+
       if (!creator) {
          console.error("Creator not found");
          // TO-DO: Handle the case where the creator is not found, e.g., show an error message
          return;
       }
-
+      console.log("Supporting creator:", creator.username, "Quantity:", quantity);
       // Handle the support logic here, e.g., minting the NFT or sending a transaction
-
+      await sdk.actions.sendToken({
+         token: "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // USDC on Base
+         amount: String(5 * quantity * 1e6), // Assuming each coffee costs 5 USDC
+         recipientFid: creator.fid
+      })
    }
 
    return (
@@ -76,8 +81,8 @@ export default function MintCoffee(
                         <br />x {quantity}
                      </span>
                   </div>
-                  <textarea 
-                     placeholder="Say something nice ..." 
+                  <textarea
+                     placeholder="Say something nice ..."
                      className="w-[250px] h-24 mt-2 p-1 border border-gray-300 rounded-lg focus:outline-none focus:border-black placeholder:text-sm"
                   ></textarea>
                </div>

@@ -7,6 +7,8 @@ import sdk, {
 } from "@farcaster/frame-sdk";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
+import { FaBars } from "react-icons/fa";
+import { Sidebar } from "~/components/Sidebar";
 import { Gluten } from "next/font/google";
 import { Input } from "~/components/ui/input";
 import { User } from "@neynar/nodejs-sdk/build/api";
@@ -21,6 +23,7 @@ const MintCoffee = dynamic(() => import("~/components/MintCoffee"), {
 export default function App() {
 
   const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png";
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [signingIn, setSigningIn] = useState(false);
   // const [signingOut, setSigningOut] = useState(false);
@@ -37,6 +40,20 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (status !== "authenticated" && !signingIn) {
+      handleSignIn()
+        .then((result) => {
+          if (result) {
+            console.log("Sign-in successful, result:", signInResult);
+          } else {
+            console.log("Sign-in failed");
+          }
+        })
+        .catch((error) => {
+          console.error("Error during sign-in:", error);
+        });
+    }
+
     if (!signingIn && status === "authenticated") {
       console.log("User is authenticated:", session);
       fetch("/api/search?usernameOrFID=" + encodeURIComponent(session.user.fid))
@@ -127,8 +144,18 @@ export default function App() {
   };
 
   return (
-    <main className={`${display.className} relative`}>
-      <header className="sticky p-2 bg-white w-full flex justify-center items-center gap-x-1 rounded-b-sm shadow-md">
+    <main className={`${display.className} relative`}>     
+     <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <header className="sticky p-2 bg-white w-full flex items-center gap-x-1 rounded-b-sm shadow-md z-20">
+        {/* Breadcrumb (sidebar toggle) icon */}
+        <button
+          className="mr-4 mt-3 text-gray-700 hover:text-gray-900 focus:outline-none"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open sidebar"
+        >
+          <FaBars size={24} />
+        </button>
         <span className="relative w-10 h-10 rounded-full overflow-hidden">
           <img src={contractLogo} alt="" className="w-full h-full object-cover" />
         </span>
