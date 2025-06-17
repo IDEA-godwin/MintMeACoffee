@@ -49,7 +49,6 @@ export default function MintCoffee(
          const isSignedIn = await handleSignIn();
          if (!isSignedIn) return; //TO-DO: Handle sign-in failure gracefully by adding toasts
       }
-
       if (!creator) {
          console.error("Creator not found");
          // TO-DO: Handle the case where the creator is not found, e.g., show an error message

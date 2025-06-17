@@ -14,7 +14,7 @@ export async function GET() {
             <img src={imgSrc} alt="Profile" tw="w-full h-full object-cover" />
           </div>
         <h1 tw="text-8xl text-white">Mint your fav a coffee!</h1>
-        <p tw="text-5xl mt-4 text-white opacity-80">Powered by Neynar 🪐</p>
+        <p tw="text-5xl mt-4 text-white opacity-80">Powered by Mintmeacoffe.com</p>
       </div>
     ),
     {

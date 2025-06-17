@@ -144,8 +144,8 @@ export default function App() {
   };
 
   return (
-    <main className={`${display.className} relative`}>     
-     <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <main className={`${display.className} relative`}>
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <header className="sticky p-2 bg-white w-full flex items-center gap-x-1 rounded-b-sm shadow-md z-20">
         {/* Breadcrumb (sidebar toggle) icon */}
@@ -160,9 +160,24 @@ export default function App() {
           <img src={contractLogo} alt="" className="w-full h-full object-cover" />
         </span>
         <h3 className="mt-3">Mint me a coffee</h3>
+        <div className="ml-auto flex items-center">
+          {signingIn ? (
+            <span className="w-9 h-9 flex items-center justify-center">
+              <svg className="animate-spin text-gray-400" width="28" height="28" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z" />
+              </svg>
+            </span>
+          ) : authUser && authUser.pfp_url ? (
+            <img
+              src={authUser.pfp_url}
+              alt="avatar"
+              className="w-9 h-9 rounded-full object-cover border ml-2"
+            />
+          ) : null}
+        </div>
       </header>
       <div className="bg-white text-center p-3 mt-4">
-        GM!{authUser && authUser.fid ? " @" + authUser.username + "," : ""} welcome to <span className="underline">mintmeacoffee.com</span><br /><br />
         Support your favorite creator with a ☕ and<br /> get rewards with unique coffee-mug NFTs
       </div>
       <div className="mb-3 p-3 relative">
@@ -211,6 +226,9 @@ export default function App() {
         )}
       </div>
       <MintCoffee creator={creator} handleSignIn={handleSignIn} signingIn={signingIn} signInFailure={signInFailure} />
+      <div className="text-center text-gray-500 mt-3">
+        powered by <span className="underline">mintmeacoffee.com</span><br /><br />
+      </div>
     </main>
   );
 }
