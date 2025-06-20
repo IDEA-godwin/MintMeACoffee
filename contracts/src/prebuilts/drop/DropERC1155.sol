@@ -40,8 +40,6 @@ contract DropERC1155 is
     Initializable,
     ContractMetadata,
     PlatformFee,
-    Royalty,
-    PrimarySale,
     Ownable,
     LazyMint,
     PermissionsEnumerable,
@@ -72,7 +70,8 @@ contract DropERC1155 is
     /// @dev Max bps in the thirdweb system.
     uint256 private constant MAX_BPS = 10_000;
 
-    address public constant DEFAULT_FEE_RECIPIENT = 0x1Af20C6B23373350aD464700B5965CE4B0D2aD94;
+    address public constant DEFAULT_FEE_RECIPIENT =
+        0x1Af20C6B23373350aD464700B5965CE4B0D2aD94;
     uint16 private constant DEFAULT_FEE_BPS = 100;
 
     /*///////////////////////////////////////////////////////////////
@@ -85,18 +84,12 @@ contract DropERC1155 is
     /// @dev Mapping from token ID => maximum possible total circulating supply of tokens with that ID.
     mapping(uint256 => uint256) public maxTotalSupply;
 
-    /// @dev Mapping from token ID => the address of the recipient of primary sales.
-    mapping(uint256 => address) public saleRecipient;
-
     /*///////////////////////////////////////////////////////////////
                                Events
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Emitted when the global max supply of a token is updated.
     event MaxTotalSupplyUpdated(uint256 tokenId, uint256 maxTotalSupply);
-
-    /// @dev Emitted when the sale recipient for a particular tokenId is updated.
-    event SaleRecipientForTokenUpdated(uint256 indexed tokenId, address saleRecipient);
 
     /*///////////////////////////////////////////////////////////////
                     Constructor + initializer logic
@@ -111,9 +104,6 @@ contract DropERC1155 is
         string memory _symbol,
         string memory _contractURI,
         address[] memory _trustedForwarders,
-        address _saleRecipient,
-        address _royaltyRecipient,
-        uint128 _royaltyBps,
         uint128 _platformFeeBps,
         address _platformFeeRecipient
     ) external initializer {
@@ -137,8 +127,6 @@ contract DropERC1155 is
         _setRoleAdmin(_metadataRole, _metadataRole);
 
         _setupPlatformFeeInfo(_platformFeeRecipient, _platformFeeBps);
-        _setupDefaultRoyaltyInfo(_royaltyRecipient, _royaltyBps);
-        _setupPrimarySaleRecipient(_saleRecipient);
 
         transferRole = _transferRole;
         minterRole = _minterRole;
@@ -152,7 +140,9 @@ contract DropERC1155 is
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Returns the uri for a given tokenId.
-    function uri(uint256 _tokenId) public view override returns (string memory) {
+    function uri(
+        uint256 _tokenId
+    ) public view override returns (string memory) {
         string memory batchUri = _getBaseURI(_tokenId);
         return string(abi.encodePacked(batchUri, _tokenId.toString()));
     }
@@ -160,8 +150,10 @@ contract DropERC1155 is
     /// @dev See ERC 165
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC1155Upgradeable, IERC165) returns (bool) {
-        return super.supportsInterface(interfaceId) || type(IERC2981Upgradeable).interfaceId == interfaceId;
+    ) public view virtual override(ERC1155Upgradeable) returns (bool) {
+        return
+            super.supportsInterface(interfaceId) ||
+            type(IERC2981Upgradeable).interfaceId == interfaceId;
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -181,15 +173,12 @@ contract DropERC1155 is
     //////////////////////////////////////////////////////////////*/
 
     /// @dev Lets a module admin set a max total supply for token.
-    function setMaxTotalSupply(uint256 _tokenId, uint256 _maxTotalSupply) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setMaxTotalSupply(
+        uint256 _tokenId,
+        uint256 _maxTotalSupply
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         maxTotalSupply[_tokenId] = _maxTotalSupply;
         emit MaxTotalSupplyUpdated(_tokenId, _maxTotalSupply);
-    }
-
-    /// @dev Lets a contract admin set the recipient for all primary sales.
-    function setSaleRecipientForToken(uint256 _tokenId, address _saleRecipient) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        saleRecipient[_tokenId] = _saleRecipient;
-        emit SaleRecipientForTokenUpdated(_tokenId, _saleRecipient);
     }
 
     /**
@@ -198,7 +187,10 @@ contract DropERC1155 is
      * @param _index Index of the desired batch in batchIds array.
      * @param _uri   the new base URI for the batch.
      */
-    function updateBatchBaseURI(uint256 _index, string calldata _uri) external onlyRole(metadataRole) {
+    function updateBatchBaseURI(
+        uint256 _index,
+        string calldata _uri
+    ) external onlyRole(metadataRole) {
         uint256 batchId = getBatchIdAtIndex(_index);
         _setBaseURI(batchId, _uri);
     }
@@ -208,7 +200,9 @@ contract DropERC1155 is
      *
      * @param _index Index of the desired batch in batchIds array.
      */
-    function freezeBatchBaseURI(uint256 _index) external onlyRole(metadataRole) {
+    function freezeBatchBaseURI(
+        uint256 _index
+    ) external onlyRole(metadataRole) {
         uint256 batchId = getBatchIdAtIndex(_index);
         _freezeBaseURI(batchId);
     }
@@ -228,7 +222,8 @@ contract DropERC1155 is
         bytes memory
     ) internal view override {
         require(
-            maxTotalSupply[_tokenId] == 0 || totalSupply[_tokenId] + _quantity <= maxTotalSupply[_tokenId],
+            maxTotalSupply[_tokenId] == 0 ||
+                totalSupply[_tokenId] + _quantity <= maxTotalSupply[_tokenId],
             "exceed max total supply"
         );
     }
@@ -236,7 +231,7 @@ contract DropERC1155 is
     /// @dev Collects and distributes the primary sale value of NFTs being claimed.
     function collectPriceOnClaim(
         uint256 _tokenId,
-        address _primarySaleRecipient,
+        address _tipRecipient,
         uint256 _quantityToClaim,
         address _currency,
         uint256 _pricePerToken
@@ -246,11 +241,15 @@ contract DropERC1155 is
             return;
         }
 
-        (address platformFeeRecipient, uint16 platformFeeBps) = getPlatformFeeInfo();
+        require(
+            _tipRecipient != address(0),
+            "tip recipient cannot be zero address"
+        );
 
-        address _saleRecipient = _primarySaleRecipient == address(0)
-            ? (saleRecipient[_tokenId] == address(0) ? primarySaleRecipient() : saleRecipient[_tokenId])
-            : _primarySaleRecipient;
+        (
+            address platformFeeRecipient,
+            uint16 platformFeeBps
+        ) = getPlatformFeeInfo();
 
         uint256 totalPrice = _quantityToClaim * _pricePerToken;
         uint256 platformFeesTw = (totalPrice * DEFAULT_FEE_BPS) / MAX_BPS;
@@ -264,18 +263,32 @@ contract DropERC1155 is
         }
         require(validMsgValue, "!V");
 
-        CurrencyTransferLib.transferCurrency(_currency, _msgSender(), DEFAULT_FEE_RECIPIENT, platformFeesTw);
-        CurrencyTransferLib.transferCurrency(_currency, _msgSender(), platformFeeRecipient, platformFees);
         CurrencyTransferLib.transferCurrency(
             _currency,
             _msgSender(),
-            _saleRecipient,
+            DEFAULT_FEE_RECIPIENT,
+            platformFeesTw
+        );
+        CurrencyTransferLib.transferCurrency(
+            _currency,
+            _msgSender(),
+            platformFeeRecipient,
+            platformFees
+        );
+        CurrencyTransferLib.transferCurrency(
+            _currency,
+            _msgSender(),
+            _tipRecipient,
             totalPrice - platformFees - platformFeesTw
         );
     }
 
     /// @dev Transfers the NFTs being claimed.
-    function transferTokensOnClaim(address _to, uint256 _tokenId, uint256 _quantityBeingClaimed) internal override {
+    function transferTokensOnClaim(
+        address _to,
+        uint256 _tokenId,
+        uint256 _quantityBeingClaimed
+    ) internal override {
         _mint(_to, _tokenId, _quantityBeingClaimed, "");
     }
 
@@ -284,18 +297,8 @@ contract DropERC1155 is
         return hasRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
-    /// @dev Checks whether primary sale recipient can be set in the given execution context.
-    function _canSetPrimarySaleRecipient() internal view override returns (bool) {
-        return hasRole(DEFAULT_ADMIN_ROLE, _msgSender());
-    }
-
     /// @dev Checks whether owner can be set in the given execution context.
     function _canSetOwner() internal view override returns (bool) {
-        return hasRole(DEFAULT_ADMIN_ROLE, _msgSender());
-    }
-
-    /// @dev Checks whether royalty info can be set in the given execution context.
-    function _canSetRoyaltyInfo() internal view override returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
@@ -324,7 +327,11 @@ contract DropERC1155 is
     }
 
     /// @dev Lets a token owner burn multiple tokens they own at once (i.e. destroy for good)
-    function burnBatch(address account, uint256[] memory ids, uint256[] memory values) public virtual {
+    function burnBatch(
+        address account,
+        uint256[] memory ids,
+        uint256[] memory values
+    ) public virtual {
         require(
             account == _msgSender() || isApprovedForAll(account, _msgSender()),
             "ERC1155: caller is not owner nor approved."
@@ -347,8 +354,15 @@ contract DropERC1155 is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
 
         // if transfer is restricted on the contract, we still want to allow burning and minting
-        if (!hasRole(transferRole, address(0)) && from != address(0) && to != address(0)) {
-            require(hasRole(transferRole, from) || hasRole(transferRole, to), "restricted to TRANSFER_ROLE holders.");
+        if (
+            !hasRole(transferRole, address(0)) &&
+            from != address(0) &&
+            to != address(0)
+        ) {
+            require(
+                hasRole(transferRole, from) || hasRole(transferRole, to),
+                "restricted to TRANSFER_ROLE holders."
+            );
         }
 
         if (from == address(0)) {
