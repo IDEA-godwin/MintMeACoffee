@@ -59,7 +59,7 @@ export default function App() {
         console.log("wallet connected")
         console.log(address)
         break;
-      case 'disconnect':
+      case 'disconnected':
         console.log("wallet disconnected")
         break;
       default:
