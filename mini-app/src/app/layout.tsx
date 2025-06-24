@@ -24,7 +24,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
        <body
-        className={`${display.variable} overscroll-none bg-white text-black`}
+        className={`${display.variable} overscroll-none text-black`}
       >
         <Providers session={session}>{children}</Providers>
       </body>

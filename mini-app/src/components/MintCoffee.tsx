@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import Pattern from "./Pattern";
 import { Button } from "./ui/Button";
 import { Card, CardContent } from "./ui/card";
 import { Minus, Plus } from "lucide-react";
@@ -17,6 +16,7 @@ import {
 
 import { parseUnits, parseAbi } from "viem";
 import { cidToBytes32, simulateClaimContract } from "~/lib/web3Util";
+import { toast, Toaster } from "sonner";
 
 
 const claimAbi = parseAbi([
@@ -30,8 +30,7 @@ const erc20Abi = parseAbi([
 export default function MintCoffee(
    { creator, handleSignIn, signingIn, signInFailure }: { creator: User | undefined, handleSignIn: () => Promise<boolean>, signingIn: boolean, signInFailure: string | undefined }
 ) {
-
-   const { status } = useSession();
+   const { status } = useSession()
    const { address } = useAccount()
 
    const [quantity, setQuantity] = useState(1);
@@ -44,7 +43,7 @@ export default function MintCoffee(
    const callData = "0x";
 
    const [loading, setLoading] = useState(false)
-   const totalAmount = pricePerToken * BigInt(quantity); // pricePerToken is already a BigInt
+   const totalAmount = pricePerToken * BigInt(quantity + 1); // pricePerToken is already a BigInt
 
    const config = useConfig()
    const { data: contractResult, writeContract, isSuccess, status: callStatus, error } = useWriteContract();
@@ -62,6 +61,12 @@ export default function MintCoffee(
             break;
          case 'error':
             console.log("failed with error " + approveError)
+            toast.error(error?.message ?? "Approve contract to spend. Try Again", {
+               position: "bottom-left",
+               dismissible: true,
+               closeButton: true,
+               richColors: true
+            })
             break;
          case 'success':
             console.log("spend approved")
@@ -83,7 +88,16 @@ export default function MintCoffee(
             }).then(request => {
                console.log(request)
                writeContract(request)
-            }).catch(err => { console.log("failed error ", err); setLoading(false) })
+            }).catch(err => {
+               console.log("failed error ", err);
+               toast.error(error?.message ?? "Transaction failed to execute. Try Again", {
+                  position: "bottom-left",
+                  dismissible: true,
+                  closeButton: true,
+                  richColors: true,
+               })
+               setLoading(false)
+            })
             break;
          default:
             break;
@@ -95,7 +109,7 @@ export default function MintCoffee(
          address: currency,
          abi: erc20Abi,
          functionName: "approve",
-         args: [contractAddress, totalAmount + 1n],
+         args: [contractAddress, totalAmount],
       });
    };
 
@@ -111,10 +125,22 @@ export default function MintCoffee(
             break;
          case 'error':
             console.log("failed with error " + error)
+            toast.error(error?.message ?? "Transaction failed to execute. Try Again", {
+               position: "bottom-left",
+               dismissible: true,
+               closeButton: true,
+               richColors: true
+            })
             setLoading(false)
             break;
          case 'success':
             console.log("executed successfully with result ", contractResult)
+            toast.success("Transaction Successful with hash " + contractResult, {
+               position: "bottom-left",
+               dismissible: true,
+               closeButton: true,
+               richColors: true
+            })
             setLoading(false)
             break;
          default:
@@ -154,6 +180,11 @@ export default function MintCoffee(
       if (!creator) {
          console.error("Creator not found");
          // TO-DO: Handle the case where the creator is not found, e.g., show an error message
+         toast.info("Select a creator to proceed", {
+            position: "top-center",
+            richColors: true,
+            className: "bg-white"
+         })
          return;
       }
       console.log("Supporting creator:", creator.username, "Quantity:", quantity);
@@ -188,79 +219,90 @@ export default function MintCoffee(
    }
 
    return (
-      <Pattern>
-         <Card className="w-full max-w-md">
-            <CardContent className="">
-               <h3 className="text-2xl font-bold dark:text-white">
-                  {`Mint ${creator?.display_name || "??"} a Coffee`}
-               </h3>
-               <div className="w-full flex justify-between items-center rounded-lg mb-4 gap-2">
-                  <div className="flex items-center relative">
-                     <span className="w-20 inline-block">
-                        <img src={contractLogo} alt="" className="w-full h-full object-cover" />
-                     </span>
-                     <span className="absolute end-0 top-[-15px] text-sm font-semibold ">
-                        {/* <span className="bg-gray-300 rounded-lg p-1 text-xs">$5 each</span> */}
-                        <br />x {quantity}
-                     </span>
-                  </div>
-                  <textarea
-                     placeholder="Say something nice ..."
-                     className="w-[250px] h-24 mt-2 p-1 border border-gray-300 rounded-lg focus:outline-none focus:border-black placeholder:text-sm"
-                  ></textarea>
+      <Card className="mx-5 my-10">
+         <Toaster />
+         <CardContent className="">
+            <h3 className="text-2xl font-bold dark:text-white">
+               {`Mint ${creator?.display_name || "??"} a Coffee`}
+            </h3>
+            <div className="w-full flex justify-between items-center rounded-lg mb-4 gap-2">
+               <div className="flex items-center relative">
+                  <span className="w-20 inline-block">
+                     <img src={contractLogo} alt="" className="w-full h-full object-cover" />
+                  </span>
+                  <span className="absolute end-0 top-[-15px] text-sm font-semibold ">
+                     {/* <span className="bg-gray-300 rounded-lg p-1 text-xs">$5 each</span> */}
+                     <br />x {quantity}
+                  </span>
                </div>
+               <textarea
+                  placeholder="Say something nice ..."
+                  className="w-[250px] h-24 mt-2 p-1 border border-gray-300 rounded-lg focus:outline-none focus:border-black placeholder:text-sm"
+               ></textarea>
+            </div>
 
-               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  No such thing as over caffination here!
-               </p>
-               <div className="flex items-center justify-center mb-4 gap-4">
-                  <div className="flex items-center">
-                     <Button
-                        onClick={decreaseQuantity}
-                        disabled={quantity <= 1}
-                        aria-label="Decrease quantity"
-                        className="rounded-r-none bg-black"
-                     >
-                        <Minus className="h-4 w-4" />
-                     </Button>
-                     <Input
-                        type="number"
-                        value={quantity}
-                        onChange={handleQuantityChange}
-                        className="w-10 sm:w-24 text-center rounded-none border-x-0 sm:pl-6"
-                        min="1"
-                        max="10"
-                     />
-                     <Button
-                        onClick={increaseQuantity}
-                        aria-label="Increase quantity"
-                        className="rounded-l-none bg-black"
-                     >
-                        <Plus className="h-4 w-4 " />
-                     </Button>
-                  </div>
-                  <div className="text-base pr-1 mt-5 font-semibold dark:text-white">
-                     Total: {5 * quantity} {"USDC"}
-                  </div>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
+               No such thing as over caffination here!
+            </p>
+            <div className="flex items-center justify-center mb-4 gap-4">
+               <div className="flex items-center">
+                  <Button
+                     onClick={decreaseQuantity}
+                     disabled={quantity <= 1}
+                     aria-label="Decrease quantity"
+                     className="rounded-r-none bg-black"
+                  >
+                     <Minus className="h-4 w-4" />
+                  </Button>
+                  <Input
+                     type="number"
+                     value={quantity}
+                     onChange={handleQuantityChange}
+                     className="text-center rounded-none border-x-0"
+                     min="1"
+                     max="10"
+                  />
+                  <Button
+                     onClick={increaseQuantity}
+                     aria-label="Increase quantity"
+                     className="rounded-l-none bg-black"
+                  >
+                     <Plus className="h-4 w-4 " />
+                  </Button>
                </div>
-               <Button disabled={loading} onClick={handleSupport}>
+               <div className="text-base pr-1 mt-5 font-semibold dark:text-white">
+                  Total: {5 * quantity} {"USDC"}
+               </div>
+            </div>
+            <Button disabled={loading} onClick={handleSupport} className="flex justify-center">
+               {
+                  !loading ? <span>Support</span> :
+                     <span className="w-9 h-9 flex items-center justify-center">
+                        <svg className="animate-spin text-gray-400" width="28" height="28" viewBox="0 0 24 24">
+                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z" />
+                        </svg>
+                     </span>
+               }
+            </Button>
+
+            {status === "unauthenticated" && (
+               <p className="text-center text-red-500 mt-2 w-full">
                   {
-                     !loading ? <span>Support</span> :
-                        <span className="w-9 h-9 flex items-center justify-center">
-                           <svg className="animate-spin text-gray-400" width="28" height="28" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z" />
-                           </svg>
+                     !signingIn
+                        ? <span>Please sign in to support {creator?.username || "this creator"}.</span>
+                        : <span className="flex justify-center items-center">
+                           <span className="w-9 h-9 flex items-center justify-center">
+                              <svg className="animate-spin text-gray-400" width="28" height="28" viewBox="0 0 24 24">
+                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z" />
+                              </svg>
+                           </span> Signing In ...
                         </span>
                   }
-               </Button>
-
-               {status === "unauthenticated" && (
-                  <p className="text-center text-red-500 mt-2">
-                     Please sign in to support {creator?.username || "this creator"}.
-                  </p>
-               )}
-               {/* <div className="flex items-center space-x-2 mb-4">
+               </p>
+            )}
+            {/* <div className="flex items-center space-x-2 mb-4">
                   <Switch
                      id="custom-address"
                      checked={useCustomAddress}
@@ -286,8 +328,8 @@ export default function MintCoffee(
                      />
                   </div>
                )} */}
-            </CardContent>
-            {/* <CardFooter>
+         </CardContent>
+         {/* <CardFooter>
                {account ? (
                   <ClaimButton
                      theme={"light"}
@@ -338,7 +380,6 @@ export default function MintCoffee(
                   />
                )}
             </CardFooter> */}
-         </Card>
-      </Pattern>
+      </Card>
    )
 }
