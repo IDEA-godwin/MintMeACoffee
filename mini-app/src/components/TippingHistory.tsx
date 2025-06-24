@@ -35,6 +35,10 @@ export default function TippingHistory() {
       const data: any[] = [];
       while (isValidIndex) {
         try {
+          if (!user) {
+            setLoading(false)
+            return
+          }
           const result = await getHistory(config, functionName, tippingAbi, user, x);
           data.push(result);
           isValidIndex = !!result;
