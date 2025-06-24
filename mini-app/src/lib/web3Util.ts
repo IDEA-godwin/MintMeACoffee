@@ -1,12 +1,15 @@
 
 import { CID } from 'multiformats/cid'
-import { Config, simulateContract, SimulateContractParameters } from '@wagmi/core'
+import { base58btc } from 'multiformats/bases/base58'
+import { sha256 } from 'multiformats/hashes/sha2'
+import * as digest from 'multiformats/hashes/digest'
+import { Config, readContract, simulateContract, SimulateContractParameters } from '@wagmi/core'
 
 export type GenericError = {
-  message: string;
-  code?: string | number;
-  cause?: unknown;
-  stack?: string;
+   message: string;
+   code?: string | number;
+   cause?: unknown;
+   stack?: string;
 };
 
 export const simulateClaimContract = async (config: Config, req: SimulateContractParameters) => {
@@ -18,6 +21,17 @@ export const simulateClaimContract = async (config: Config, req: SimulateContrac
    } catch (error: any) {
       throw new Error(`simulation failed with error ${error}`)
    }
+}
+
+export const getHistory = async (config: Config, functionName: string, abi: any, user: `0x${string}`, index: any) => {
+   console.log(functionName, user, index)
+   const result = await readContract(config, {
+      functionName,
+      abi,
+      args: [user, index],
+      address: "0x4CA55360d24cC11cA4364544AAc947868F6F9280"
+   })
+   return result
 }
 
 /**
@@ -56,22 +70,16 @@ export function cidToBytes32(cidv0: string) {
  */
 export function bytes32ToCid(bytes32: string) {
    try {
-      // Remove 0x prefix if present
-      const cleanHex = bytes32.startsWith('0x') ? bytes32.slice(2) : bytes32
+      const hex = bytes32.slice(2);
+      const bytes = Uint8Array.from(Buffer.from(hex, 'hex'));
 
-      // Ensure it's 64 hex chars (32 bytes)
-      if (cleanHex.length !== 64) {
-         throw new Error('Invalid bytes32 length')
-      }
+      // Construct a digest manually (since it's already a SHA-256 digest)
+      const hashDigest = digest.create(sha256.code, bytes);
 
-      // Add multihash prefix: 0x12 (sha2-256) + 0x20 (32 bytes)
-      const multihashHex = '1220' + cleanHex
-      const multihashBytes = Buffer.from(multihashHex, 'hex')
+      // CIDv0 is CID with version 0, DAG-PB codec (0x70)
+      const cid = CID.createV0(hashDigest);
 
-      // Create CIDv0
-      const cid = CID.createV0(multihashBytes as any)
-
-      return cid.toString()
+      return cid.toString(base58btc);
    } catch (error) {
       throw new Error(`Invalid bytes32: ${error}`)
    }

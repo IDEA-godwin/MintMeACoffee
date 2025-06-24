@@ -34,6 +34,7 @@ export default function MintCoffee(
    const { address } = useAccount()
 
    const [quantity, setQuantity] = useState(1);
+   const [message, setMessage] = useState("");
    const [tipMetadataUri, setTipMetadataUri] = useState("")
    const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png"; // Replace with actual logo URL
    const contractAddress = "0x4CA55360d24cC11cA4364544AAc947868F6F9280"
@@ -61,6 +62,7 @@ export default function MintCoffee(
             break;
          case 'error':
             console.log("failed with error " + approveError)
+            setLoading(false)
             toast.error(error?.message ?? "Approve contract to spend. Try Again", {
                position: "bottom-left",
                dismissible: true,
@@ -193,6 +195,7 @@ export default function MintCoffee(
          const metadata = {
             creator: creator?.verified_addresses?.primary.eth_address,
             fan: address,
+            message,
             quantity,
             tokenId: 0,
             timestamp: Date.now(),
@@ -236,7 +239,7 @@ export default function MintCoffee(
                   </span>
                </div>
                <textarea
-                  placeholder="Say something nice ..."
+                  placeholder="Say something nice ..." value={message} onChange={e => setMessage(e.target.value)}
                   className="w-[250px] h-24 mt-2 p-1 border border-gray-300 rounded-lg focus:outline-none focus:border-black placeholder:text-sm"
                ></textarea>
             </div>

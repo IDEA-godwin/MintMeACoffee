@@ -1,13 +1,20 @@
 import React from "react";
-import { FaTimes, FaSignOutAlt, FaPlus, FaHistory, FaCog } from "react-icons/fa";
+import { 
+  FaTimes, 
+  FaSignOutAlt, 
+  // FaPlus, 
+  FaHistory, 
+  // FaCog 
+} from "react-icons/fa";
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
-  // onSignOut?: () => void; // Uncomment and use if you want to handle sign out
+  onShowTippingHistory?: () => void
+  onSignOut?: () => void; // Uncomment and use if you want to handle sign out
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onShowTippingHistory }) => {
   return (
     <>
       <div
@@ -26,15 +33,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
           </button>
         </div>
         <nav className="flex-1 flex flex-col gap-2 px-4 py-6">
-          <button className="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 text-left">
+          {/* <button className="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 text-left">
             <FaPlus /> <span>Create Page</span>
-          </button>
-          <button className="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 text-left">
+          </button> */}
+          <button onClick={onShowTippingHistory} className="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 text-left">
             <FaHistory /> <span>Tipping History</span>
           </button>
-          <button className="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 text-left">
+          {/* <button className="flex items-center gap-3 px-2 py-2 rounded hover:bg-gray-100 text-left">
             <FaCog /> <span>Settings</span>
-          </button>
+          </button> */}
         </nav>
         <div className="mt-auto px-4 py-6 border-t">
           <button
