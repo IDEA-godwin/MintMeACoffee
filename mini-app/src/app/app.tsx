@@ -130,7 +130,7 @@ export default function App() {
     fetch(`/api/search?usernameOrFID=${encodeURIComponent(usernameOrFID)}&limit=10`)
       .then(res => res.json())
       .then(result => {
-        console.log("Fetched more results:", user);
+        console.log("Fetched more results:", result);
         if (result?.code === "NotFound") {
           setIsInvalid(true);
           return;

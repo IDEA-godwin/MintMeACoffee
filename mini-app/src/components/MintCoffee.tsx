@@ -8,17 +8,119 @@ import { Minus, Plus } from "lucide-react";
 import { Input } from "./ui/input";
 import { User } from "@neynar/nodejs-sdk/build/api";
 import { useSession } from "next-auth/react";
-import sdk from "@farcaster/frame-sdk";
 
+import {
+   useConfig,
+   useWriteContract,
+   useAccount
+} from "wagmi"
+
+import { parseUnits, parseAbi } from "viem";
+import { cidToBytes32, simulateClaimContract } from "~/lib/web3Util";
+
+
+const claimAbi = parseAbi([
+   "function claim(address _tipRecipient, address _receiver, uint256 _tokenId, uint256 _quantity, address _currency, uint256 _pricePerToken, bytes32 _tipMetadataUri, (bytes32[] proof, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) _allowlistProof, bytes _data) payable"
+]);
+
+const erc20Abi = parseAbi([
+   "function approve(address spender, uint256 amount) external returns (bool)"
+]);
 
 export default function MintCoffee(
    { creator, handleSignIn, signingIn, signInFailure }: { creator: User | undefined, handleSignIn: () => Promise<boolean>, signingIn: boolean, signInFailure: string | undefined }
 ) {
 
    const { status } = useSession();
+   const { address } = useAccount()
 
    const [quantity, setQuantity] = useState(1);
+   const [tipMetadataUri, setTipMetadataUri] = useState("")
    const contractLogo = "https://nft.unchainedelephants.com/wp-content/uploads/2025/04/Your-paragraph-text-5-scaled.png"; // Replace with actual logo URL
+   const contractAddress = "0x4CA55360d24cC11cA4364544AAc947868F6F9280"
+   const currency = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base
+   const pricePerToken = parseUnits("5", 6); // 5 USDC (6 decimals)
+   const allowlistProof = { proof: ["0x0000000000000000000000000000000000000000000000000000000000000000"], quantityLimitPerWallet: 100, pricePerToken, currency };
+   const callData = "0x";
+
+   const [loading, setLoading] = useState(false)
+   const totalAmount = pricePerToken * BigInt(quantity); // pricePerToken is already a BigInt
+
+   const config = useConfig()
+   const { data: contractResult, writeContract, isSuccess, status: callStatus, error } = useWriteContract();
+   const { writeContract: writeApprove, isSuccess: approveSuccess, status: approveStatus, error: approveError } = useWriteContract();
+
+   useEffect(() => {
+      if (approveSuccess) console.log("approve successfull")
+
+      switch (approveStatus) {
+         case 'idle':
+            console.log("awaiting execution")
+            break;
+         case 'pending':
+            console.log("executing")
+            break;
+         case 'error':
+            console.log("failed with error " + approveError)
+            break;
+         case 'success':
+            console.log("spend approved")
+            simulateClaimContract(config, {
+               address: contractAddress,
+               abi: claimAbi,
+               functionName: "claim",
+               args: [
+                  creator?.verified_addresses?.primary.eth_address, // _tipRecipient
+                  address, // _receiver
+                  0,
+                  quantity,
+                  currency,
+                  pricePerToken,
+                  tipMetadataUri,
+                  allowlistProof,
+                  callData
+               ],
+            }).then(request => {
+               console.log(request)
+               writeContract(request)
+            }).catch(err => { console.log("failed error ", err); setLoading(false) })
+            break;
+         default:
+            break;
+      }
+   }, [approveSuccess, approveStatus])
+   // Call this before calling claim
+   const handleApprove = () => {
+      writeApprove({
+         address: currency,
+         abi: erc20Abi,
+         functionName: "approve",
+         args: [contractAddress, totalAmount + 1n],
+      });
+   };
+
+   useEffect(() => {
+      if (isSuccess) console.log("claim successful with hash ", contractResult)
+
+      switch (callStatus) {
+         case 'idle':
+            console.log("awaiting execution")
+            break;
+         case 'pending':
+            console.log("executing")
+            break;
+         case 'error':
+            console.log("failed with error " + error)
+            setLoading(false)
+            break;
+         case 'success':
+            console.log("executed successfully with result ", contractResult)
+            setLoading(false)
+            break;
+         default:
+            break;
+      }
+   }, [isSuccess, callStatus])
 
    const decreaseQuantity = () => {
       setQuantity((prev) => Math.max(1, prev - 1));
@@ -55,12 +157,34 @@ export default function MintCoffee(
          return;
       }
       console.log("Supporting creator:", creator.username, "Quantity:", quantity);
-      // Handle the support logic here, e.g., minting the NFT or sending a transaction
-      await sdk.actions.sendToken({
-         token: "eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // USDC on Base
-         amount: String(5 * quantity * 1e6), // Assuming each coffee costs 5 USDC
-         recipientFid: creator.fid
-      })
+      setLoading(true)
+      try {
+         const metadata = {
+            creator: creator?.verified_addresses?.primary.eth_address,
+            fan: address,
+            quantity,
+            tokenId: 0,
+            timestamp: Date.now(),
+         };
+
+         // Upload JSON to Pinata
+         const result = await fetch('/api/upload', {
+            method: 'POST',
+            body: JSON.stringify(metadata)
+         });
+         const data = await result.json()
+         console.log(data)
+         const metadataUri = cidToBytes32(data?.IpfsHash ?? "")
+         console.log(metadataUri)
+         setTipMetadataUri(metadataUri)
+
+         handleApprove()
+      } catch (err) {
+         console.error("Pinata upload failed:", err);
+         // Optionally show error to user
+         setLoading(false)
+         return;
+      }
    }
 
    return (
@@ -119,7 +243,17 @@ export default function MintCoffee(
                      Total: {5 * quantity} {"USDC"}
                   </div>
                </div>
-               <Button onClick={handleSupport}>Support</Button>
+               <Button disabled={loading} onClick={handleSupport}>
+                  {
+                     !loading ? <span>Support</span> :
+                        <span className="w-9 h-9 flex items-center justify-center">
+                           <svg className="animate-spin text-gray-400" width="28" height="28" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z" />
+                           </svg>
+                        </span>
+                  }
+               </Button>
 
                {status === "unauthenticated" && (
                   <p className="text-center text-red-500 mt-2">

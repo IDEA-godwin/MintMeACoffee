@@ -23,7 +23,6 @@ export async function GET(req: NextRequest) {
       if (uri.startsWith("bulk/")) {
          data = { user: data.users[0] || null };
       }
-
       console.log("User search response:", data);
       return new Response(JSON.stringify(data), {
          status: 200,
